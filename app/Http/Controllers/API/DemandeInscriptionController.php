@@ -103,7 +103,8 @@ class DemandeInscriptionController extends Controller
 
 
         }
-        $user->banned = null;
+        $user->banned = "0";
+        $user->banned_at = null;
         $user->save();
         return $this->successResponse(null, "Enregistrement effectué avec succès!",201);
 
@@ -115,12 +116,6 @@ class DemandeInscriptionController extends Controller
      */
     public function ban($id)
     {
-        // ban for days
-        $ban_for_next_7_days = Carbon::now()->addDays(7);
-        $ban_for_next_14_days = Carbon::now()->addDays(14);
-        $ban_permanently = 0;
-
-        // ban user
         $user_id = $id;
         $user = User::find($user_id);
         if(!$user)
@@ -130,7 +125,8 @@ class DemandeInscriptionController extends Controller
 
 
         }
-        $user->banned = $ban_permanently;
+        $user->banned = "1";
+        $user->banned_at = Carbon::now()->addDays(7);
         $user->save();
         return $this->successResponse(null, "Enregistrement effectué avec succès!",201);
 
