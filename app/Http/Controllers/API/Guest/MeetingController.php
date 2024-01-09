@@ -214,8 +214,7 @@ class MeetingController extends Controller
         }
 
         // Retrieve the project by ID
-        $project = Project::where('slug', $request->project_id)
-            ->first();
+        $project = Project::find($request->project_id);
         // Retrieve the authenticated user
         $user = Auth::user();
         if (!$project) {
@@ -234,7 +233,7 @@ class MeetingController extends Controller
 
         $meeting = Meeting::create(
   [          'title' => $request->title,
-            'project_id' => $request->project_id,
+            'project_id' => $project->id,
             'description'=> $request->description,
             'date' => $request->date,]
         );
