@@ -46,7 +46,7 @@ class AuthController extends Controller
                     $token = $user->createToken('Laravel Password Grant Client')->accessToken;
                     $user->api_token = $token;
                     $response = ['status'=>"success",'user'=> $user ,'token' => $token];
-                    return response($user, 200);
+                    return response($response, 200);
 
                 }
                 else {
