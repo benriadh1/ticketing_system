@@ -1152,13 +1152,15 @@ class DemandeInscriptionController extends Controller
             {
                 $message
                     ->from(config('mail.from.address'), config('mail.from.name'))
-                    ->to('email@email.com','Company')
+                    ->to($email, $nom)
                     ->subject($subject);
             });
             }
 
             catch(\Exception $e){
-
+                return response([
+                    'message' => 'quelque chose s\'est mal passé'
+                ], 400);
             }
         }
         if($request->emailtype === 'E-mail de bienvenue' ){
@@ -1167,13 +1169,15 @@ class DemandeInscriptionController extends Controller
             {
                 $message
                     ->from(config('mail.from.address'), config('mail.from.name'))
-                    ->to('email@email.com','Company')
+                    ->to($email, $nom)
                     ->subject($subject);
             });
         }
 
     catch(\Exception $e){
-
+        return response([
+            'message' => 'quelque chose s\'est mal passé'
+        ], 400);
     }
 
         }
@@ -1183,13 +1187,15 @@ class DemandeInscriptionController extends Controller
                 {
                     $message
                         ->from(config('mail.from.address'), config('mail.from.name'))
-                        ->to('email@email.com','Company')
+                        ->to($email, $nom)
                         ->subject($subject);
                 });
             }
 
             catch(\Exception $e){
-
+                return response([
+                    'message' => 'quelque chose s\'est mal passé'
+                ], 400);
             }
         }
         if($request->emailtype === 'E-mail d’acceptation' ){
@@ -1198,13 +1204,15 @@ class DemandeInscriptionController extends Controller
                 {
                     $message
                         ->from(config('mail.from.address'), config('mail.from.name'))
-                        ->to('email@email.com','Company')
+                        ->to($email, $nom)
                         ->subject($subject);
                 });
             }
 
             catch(\Exception $e){
-
+                return response([
+                    'message' => 'quelque chose s\'est mal passé'
+                ], 400);
             }
         }
         if($request->emailtype === 'E-mail de rejet' ){
@@ -1213,13 +1221,15 @@ class DemandeInscriptionController extends Controller
                 {
                     $message
                         ->from(config('mail.from.address'), config('mail.from.name'))
-                        ->to('email@email.com','Company')
+                        ->to($email, $nom)
                         ->subject($subject);
                 });
             }
 
             catch(\Exception $e){
-
+                return response([
+                    'message' => 'quelque chose s\'est mal passé'
+                ], 400);
             }
         }
 
