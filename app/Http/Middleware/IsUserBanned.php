@@ -17,19 +17,17 @@ class IsUserBanned
      */
     public function handle($request, Closure $next)
     {
-        if (auth()->check() && auth()->user()->banned != null) {
-            $message = '';
-            if (auth()->user()->banned == 0) {
-                $message = 'Votre compte a été définitivement banni.';
-            }
-            if (now()->lessThan(auth()->user()->banned)) {
-                $banned_days = now()->diffInDays(auth()->user()->banned) + 1;
+        $user = auth()->user();
+
+        if ($user && $user->banned === "1") {
+            $message = 'Votre compte a été définitivement banni.';
+
+            if ($user->banned_at && now()->lessThan($user->banned_at)) {
+                $banned_days = now()->diffInDays($user->banned_at) + 1;
                 $message = 'Votre compte a été suspendu pour ' . $banned_days . ' ' . Str::plural('jour', $banned_days);
             }
 
-            auth()->logout();
-            $user = auth()->user()->token();
-            $user->revoke();
+            $user->token()->revoke();
             return response()->json(['error' => $message], 400);
         }
 
