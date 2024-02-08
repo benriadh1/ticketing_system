@@ -201,7 +201,10 @@ class ProjectThreadsController extends Controller
 
         if (is_array($files)) {
             foreach ($files as $file) {
-                if (!empty($file) && in_array($file->getClientOriginalExtension(), ['jpg', 'png','jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'])) {
+                $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                $extension = strtolower($file->getClientOriginalExtension());
+                $realExtension = strtolower($file->extension());
+                if (!empty($file) && in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                     $path = '/uploads/' . Storage::disk('uploads')->put('/' . $request->user()->email . '/projets/conversation/' . $thread->id . '/messages/' . $message->id, $file);
                     $filename = $request->user()->id . '-' . substr(md5($request->user()->id . '-' . Str::random(14)), 0, 15) . '.' . $file->getClientOriginalExtension();
 
@@ -278,7 +281,10 @@ class ProjectThreadsController extends Controller
 
         if (is_array($files)) {
             foreach ($files as $file) {
-                if (!empty($file) && in_array($file->getClientOriginalExtension(), ['jpg', 'png','jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'])) {
+                $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                $extension = strtolower($file->getClientOriginalExtension());
+                $realExtension = strtolower($file->extension());
+                if (!empty($file) && in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                     $path = '/uploads/' . Storage::disk('uploads')->put('/' . $request->user()->email . '/projets/conversation/' . $thread->id . '/messages/' . $message->id, $file);
                     $filename = $request->user()->id . '-' . substr(md5($request->user()->id . '-' . Str::random(14)), 0, 15) . '.' . $file->getClientOriginalExtension();
 
@@ -426,14 +432,29 @@ class ProjectThreadsController extends Controller
         if (!$thread) {
             return $this->errorResponse(404, ["Conversation introuvable"],"Conversation introuvable" );
         }
-        if ($thread->creator()->id === $request->user()->id) {
-            $thread->addParticipant(explode(',', $request->user_id));
-            $this->activityService->logActivity('conversation', 'ajouter un nouveau participant', 'conversation', $thread->id, 'user',  $user->id);
-
-            return $this->successResponse([], 'Enregistrement effectué avec succès!', 201);
-        } else {
+        $project = $thread->threadconnection ? $thread->threadconnection->project : null;
+        if (!$project || !$project->team) {
+            return $this->errorResponse(404, ["Projet introuvable"],"Projet introuvable" );
+        }
+        $allowedIds = $project->team->users->pluck('id')->all();
+        $allowedIds[] = $project->team->owner_id;
+        $memberIds = [];
+        foreach (explode(',', $request->user_id) as $memberId) {
+            $memberId = (int) $memberId;
+            if ($memberId && in_array($memberId, $allowedIds)) {
+                $memberIds[] = $memberId;
+            }
+        }
+        if ($thread->creator()->id !== $request->user()->id) {
             return $this->errorResponse(422, ['Vous n\'êtes pas le propriétaire'], 'Vous n\'êtes pas le propriétaire');
         }
+        if (!$memberIds) {
+            return $this->errorResponse(422, ["Cet utilisateur n'est pas membre du projet"], "Cet utilisateur n'est pas membre du projet");
+        }
+        $thread->addParticipant(array_values(array_unique($memberIds)));
+        $this->activityService->logActivity('conversation', 'ajouter un nouveau participant', 'conversation', $thread->id, 'user',  $user->id);
+
+        return $this->successResponse([], 'Enregistrement effectué avec succès!', 201);
     }
 
 
