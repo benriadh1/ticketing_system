@@ -184,7 +184,18 @@ class ProjectThreadsController extends Controller
         ]);
 
         // Recipients
-        $thread->addParticipant(explode(',', $request->members));
+        $allowedIds = $project->team->users->pluck('id')->all();
+        $allowedIds[] = $project->team->owner_id;
+        $memberIds = [];
+        foreach (explode(',', $request->members) as $memberId) {
+            $memberId = (int) $memberId;
+            if ($memberId && $memberId !== (int) $user->id && in_array($memberId, $allowedIds)) {
+                $memberIds[] = $memberId;
+            }
+        }
+        if ($memberIds) {
+            $thread->addParticipant(array_values(array_unique($memberIds)));
+        }
 
         $files = $request->file('file');
 
