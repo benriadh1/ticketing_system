@@ -54,7 +54,7 @@ Route::group(['middleware' => 'guest:api'], function () {
     Route::post('/login',  [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get("/details_application", [AppInfoConfigurationController::class, "AppConfiguration"]);
     Route::post('/inscription', [DemandeInscriptionController::class, 'store'])->middleware('throttle:5,1');
-    Route::post('/invitation/accept', [CrudInvitationController::class, 'acceptInvitation']);
+    Route::post('/invitation/accept', [CrudInvitationController::class, 'acceptInvitation'])->middleware('throttle:5,1');
     Route::get("/invitation/{token}", [CrudInvitationController::class, "index"]);
 //    Route::post('register', [RegisterController::class, 'register']);
 //

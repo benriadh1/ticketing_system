@@ -210,19 +210,32 @@ class CrudInvitationController extends Controller
             //if the invite doesn't exist
             return $this->errorResponse(404, ["Invtitation n'existe pas"], "quelque chose s'est mal passé");
         }
+        if (strcasecmp($request->email, $invite->email) !== 0) {
+            return $this->errorResponse(422, ["Cet e-mail ne correspond pas à l'invitation"], "Cet e-mail ne correspond pas à l'invitation");
+        }
+        if (User::where('email', $invite->email)->first()) {
+            return $this->errorResponse(422, ["Cet e-mail est déjà utilisé"], "Cet e-mail est déjà utilisé");
+        }
         // create the user with the details from the invite
         $password = Str::random(10);
         $user = new User();
-        $user->email = $request->email;
+        $user->email = $invite->email;
         $user->fullname = $request->prenom . ' ' . $request->nom;
         $user->prenom = $request->prenom;
         $user->nom = $request->nom;
         $user->password = bcrypt($password);
         $user->role = 'invite';
         $user->save();
+        $pendingInvites = TeamInvitation::where('email', $invite->email)->get();
+        foreach ($pendingInvites as $pendingInvite) {
+            if ($pendingInvite->team) {
+                $user->attachTeam($pendingInvite->team);
+            }
+            $pendingInvite->delete();
+        }
         $fiche =    InviteAttachment::create(      [
 
-            'email' => $request->email,
+            'email' => $invite->email,
             'photo' => "/uploads/default/blank.png",
             'nom' => $request->nom,
             'prenom' => $request->prenom,
@@ -235,10 +248,10 @@ class CrudInvitationController extends Controller
             'user_id' =>$user->id,
             'user_type' => 'App\Models\User',
         ]);
-        $content = 'Email: ' . $request->email . ' Mot de passe: ' . $password;
+        $content = 'Email: ' . $invite->email . ' Mot de passe: ' . $password;
         $body = [
             'name' => $request->prenom,
-            'email' => $request->email,
+            'email' => $invite->email,
             'password' => $password,
             'content' => $content,
             'title' => 'Compte créé',
