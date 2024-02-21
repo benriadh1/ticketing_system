@@ -237,7 +237,7 @@ class TaskController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateTask($taskId,Request $request)
+    public function updateTask($id,Request $request)
     {
         $validator = Validator::make($request->all(),[
             'parent_id' => 'nullable|integer',
@@ -250,7 +250,7 @@ class TaskController extends Controller
             'assign_id' => 'required|exists:users,id',
             'tags' => 'nullable|array',
         ]);
-        $task = Task::findOrFail($taskId);
+        $task = Task::findOrFail($id);
         if($validator->fails()) {
             return $this->errorResponse( 422,$validator->errors(), 'quelque chose s\'est mal passé' );
         }
@@ -316,9 +316,9 @@ class TaskController extends Controller
      * @param $taskId
      * @return JsonResponse
      */
-    public function deleteTask($taskId)
+    public function deleteTask($id)
     {
-        $task = Task::findOrFail($taskId);
+        $task = Task::findOrFail($id);
         $authenticatedUserId = auth()->id();
         if (!$task) {
             return $this->errorResponse(404, ["Tâche introuvable"],"Tâche introuvable" );
@@ -386,9 +386,9 @@ class TaskController extends Controller
      * @param $commentId
      * @return JsonResponse
      */
-    public function updateTaskComment(Request $request,$commentId)
+    public function updateTaskComment(Request $request,$id)
     {
-        $comment = TaskComment::findOrFail($commentId);
+        $comment = TaskComment::findOrFail($id);
         $authenticatedUserId = auth()->id();
         $validator = Validator::make($request->all(),[
 
@@ -419,9 +419,9 @@ class TaskController extends Controller
      * @param $commentId
      * @return JsonResponse
      */
-    public function deleteTaskComment($commentId)
+    public function deleteTaskComment($id)
     {
-        $comment = TaskComment::findOrFail($commentId);
+        $comment = TaskComment::findOrFail($id);
         $authenticatedUserId = auth()->id();
         if (!$comment) {
             return $this->errorResponse(404, ["Commentaire introuvable"],"Commentaire introuvable" );
