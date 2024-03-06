@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EvaluationCriteria;
 use App\Models\Project;
 use App\Models\Reminder;
+use App\Models\task;
 use App\Models\Team;
 use App\Traits\ApiResponser;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -170,6 +171,16 @@ class ReminderController extends Controller
 
         if($validator->fails()) {
             return $this->errorResponse( 422,$validator->errors(), "quelque chose s'est mal passé");
+        }
+
+        $task = task::find($request->task_id);
+        if (!$task || !$task->project || !$task->project->team) {
+            return $this->errorResponse(404, ["Tâche introuvable"], "Tâche introuvable");
+        }
+        $isMember = $task->project->team->users->contains('id', $user->id);
+        $isOwner = $user->ownedTeams->contains('id', $task->project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
         }
 
         $reminder = Reminder::create(
