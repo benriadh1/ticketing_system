@@ -418,7 +418,10 @@ class DemandeInscriptionController extends Controller
         $demande->save();
         if (is_array($files)) {
             foreach ($files as $index => $file) {
-                if (!empty($file) && in_array($file->getClientOriginalExtension(), ['jpg', 'png','jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'])) {
+                $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                $extension = strtolower($file->getClientOriginalExtension());
+                $realExtension = strtolower($file->extension());
+                if (!empty($file) && in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                     $path = '/uploads/' . Storage::disk('uploads')->put('/' . $request->email . '/photos/' , $file);
 
                     // Fill 'copie1', 'copie2', 'copie3', 'copie4' fields in the loop

@@ -834,10 +834,10 @@ class ProjectThreadsController extends Controller
                 if(count($files) > 0){
                     foreach ($files as $file) {
                         if(!empty($file)){
-                            if ($file->getClientOriginalExtension() === 'jpg' or $file->getClientOriginalExtension() === 'png' or
-                                $file->getClientOriginalExtension() === 'pdf' or $file->getClientOriginalExtension() === 'zip' or
-                                $file->getClientOriginalExtension() === 'docx' or $file->getClientOriginalExtension() === 'doc' or
-                                $file->getClientOriginalExtension() === 'pptx' or $file->getClientOriginalExtension() === 'ppt') {
+                            $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                            $extension = strtolower($file->getClientOriginalExtension());
+                            $realExtension = strtolower($file->extension());
+                            if (in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                                 $path = '/uploads/' . Storage::disk('uploads')->put('/' . $request->user()->email . '/projets/' . $project->id . '/conversation/' . $thread->id . '/messages/' . $message->id, $file);
                                 $filename = $request->user()->id . '-' . substr(md5($request->user()->id . '-' . Str::random(14)), 0, 15) .'.'. $file->getClientOriginalExtension();
 
