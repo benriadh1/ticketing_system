@@ -221,7 +221,7 @@ Route::group(['middleware' => 'auth:api','IsBanned'], function () {
             Route::get('list/{slug}',  [TaskController::class, 'index']);
             Route::post('add',  [TaskController::class, 'store']);
             Route::delete('delete/{id}',  [TaskController::class, 'deleteTask']);
-            Route::post('update/status/{id0}',  [TaskController::class, 'changeTaskStatus']);
+            Route::post('update/status/{taskId}',  [TaskController::class, 'changeTaskStatus']);
             Route::post('update/{id}',  [TaskController::class, 'updateTask']);
             Route::get('byslug/{slug}',  [TaskController::class, 'getTaskBySlug']);
             Route::group(['prefix' => 'comment'], function () {

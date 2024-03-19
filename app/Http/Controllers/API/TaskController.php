@@ -215,10 +215,9 @@ class TaskController extends Controller
         }
         // Check if the authenticated user is the owner of the task
         if ($task->user_id === auth()->id() || $task->assign_id === auth()->id()  ) {
-            // Update the task status
-            Task::where('parent_id', $task->id)->update(['status' => $task->status]);
             $task->status = $request->status;
             $task->save();
+            Task::where('parent_id', $task->id)->update(['status' => $task->status]);
 
         }else{
 
@@ -252,9 +251,6 @@ class TaskController extends Controller
             'tags' => 'nullable|array',
         ]);
         $task = Task::findOrFail($taskId);
-        if($validator->fails()) {
-            return $this->errorResponse( 422,$validator->errors(), 'quelque chose s\'est mal passé' );
-        }
         if($validator->fails()) {
             return $this->errorResponse( 422,$validator->errors(), 'quelque chose s\'est mal passé' );
         }
