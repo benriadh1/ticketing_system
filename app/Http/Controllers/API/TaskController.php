@@ -174,6 +174,12 @@ class TaskController extends Controller
             return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
         }
 
+        $assigneeIsMember = $project->team->users->contains('id', $request->assign_id);
+        $assigneeIsOwner = $project->team->owner_id == $request->assign_id;
+        if (!$assigneeIsMember && !$assigneeIsOwner) {
+            return $this->errorResponse(422, ["Cet utilisateur n'est pas membre du projet"], "Cet utilisateur n'est pas membre du projet");
+        }
+
         $task = new Task();
         $task->parent_id = $request->parent_id;
         $task->title = $request->title;
@@ -259,6 +265,12 @@ class TaskController extends Controller
         }
         // Check if the authenticated user is the owner of the task
         if ($task->user_id === auth()->id() || $task->assign_id === auth()->id()  ) {
+            $project = $task->project;
+            $assigneeIsMember = $project->team->users->contains('id', $request->assign_id);
+            $assigneeIsOwner = $project->team->owner_id == $request->assign_id;
+            if (!$assigneeIsMember && !$assigneeIsOwner) {
+                return $this->errorResponse(422, ["Cet utilisateur n'est pas membre du projet"], "Cet utilisateur n'est pas membre du projet");
+            }
             // Update the task status
             Task::where('parent_id', $task->id)->update(['status' => $request->status]);
             $task->status = $request->status;
