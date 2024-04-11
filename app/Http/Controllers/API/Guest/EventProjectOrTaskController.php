@@ -57,8 +57,22 @@ class EventProjectOrTaskController extends Controller
      */
     public function FromToDayEvents()
     {
+        $user = Auth::user();
         $today = date('Y-m-d'); // Today's date in 'YYYY-MM-DD' format
-        $eventsToday = Event::whereDate('start_datetime', '>=', $today)->with('project','task')->get();
+        $ownedTeamIds = $user->ownedTeams->pluck('id');
+        $memberTeamIds = $user->teams()->pluck('id');
+        $projectIds = Project::whereIn('team_id', $ownedTeamIds)
+            ->orWhereIn('team_id', $memberTeamIds)
+            ->pluck('id');
+        $eventsToday = Event::whereDate('start_datetime', '>=', $today)
+            ->where(function ($query) use ($projectIds) {
+                $query->whereIn('project_id', $projectIds)
+                    ->orWhereHas('task', function ($task) use ($projectIds) {
+                        $task->whereIn('project_id', $projectIds);
+                    });
+            })
+            ->with('project','task')
+            ->get();
 
 
 //        $this->activityService->logActivity('conversation', 'conversation crée', 'conversation', $thread->id, 'user',  $user->id);
@@ -79,14 +93,21 @@ class EventProjectOrTaskController extends Controller
     public function show($id)
     {
         $event = Event::find($id);
-        // Retrieve the authenticated user
-        $user = Auth::user();
-// Create the notification data.
-        event(new NotificationEvent2($user, $event));
         if (!$event) {
 
             return $this->errorResponse(404, ['Event introuvable'], 'quelque chose s\'est mal passé');
         }
+        $user = Auth::user();
+        $project = $event->task ? $event->task->project : $event->project;
+        if (!$project || !$project->team) {
+            return $this->errorResponse(404, ["Projet introuvable"],"Projet introuvable" );
+        }
+        $isMember = $project->team->users->contains('id', $user->id);
+        $isOwner = $user->ownedTeams->contains('id', $project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+        }
+        event(new NotificationEvent2($user, $event));
         return $this->successResponse($event, "Enregistrement effectué avec succès!", 201);
 
     }

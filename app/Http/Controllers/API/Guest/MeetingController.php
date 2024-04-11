@@ -116,10 +116,9 @@ class MeetingController extends Controller
             ->get();
 
         // Retrieve all meetings in the user's projects
-        $meetings = Meeting::whereHas('project', function ($query) use ($today, $projects) {
+        $meetings = Meeting::whereHas('project', function ($query) use ($projects) {
             $query->whereIn('id', $projects->pluck('id'));
-            $query->whereDate('start_datetime', '>=', $today);
-        })->with('project')->orderBy('start_datetime', 'desc')->get();
+        })->whereDate('start_datetime', '>=', $today)->with('project')->orderBy('start_datetime', 'desc')->get();
         return $this->successResponse($meetings, "Enregistrement effectué avec succès!", 201);
 
     }
@@ -134,6 +133,16 @@ class MeetingController extends Controller
         if (!$meeting) {
 
             return $this->errorResponse(404, ['meeting introuvable'], 'quelque chose s\'est mal passé');
+        }
+        $user = Auth::user();
+        $project = $meeting->project;
+        if (!$project || !$project->team) {
+            return $this->errorResponse(404, ["Projet introuvable"],"Projet introuvable" );
+        }
+        $isMember = $project->team->users->contains('id', $user->id);
+        $isOwner = $user->ownedTeams->contains('id', $project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
         }
         return $this->successResponse($meeting, "Enregistrement effectué avec succès!", 201);
 
