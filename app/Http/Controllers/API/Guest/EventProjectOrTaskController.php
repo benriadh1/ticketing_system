@@ -133,6 +133,17 @@ class EventProjectOrTaskController extends Controller
             return $this->errorResponse( 422,$validator->errors(), "quelque chose s'est mal passé");
         }
 
+        $user = Auth::user();
+        $task = task::find($request->task_id);
+        if (!$task || !$task->project || !$task->project->team) {
+            return $this->errorResponse(404, ["Tâche introuvable"], "Tâche introuvable");
+        }
+        $isMember = $task->project->team->users->contains('id', $user->id);
+        $isOwner = $user->ownedTeams->contains('id', $task->project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+        }
+
         $event = Event::create(
   [          'title' => $request->title,
             'description' => $request->description,
@@ -142,9 +153,6 @@ class EventProjectOrTaskController extends Controller
           ]
         );
 
-
-        // Retrieve the authenticated user
-        $user = Auth::user();
 
         activity()
             ->performedOn($event)
