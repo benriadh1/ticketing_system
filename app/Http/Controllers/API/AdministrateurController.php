@@ -178,11 +178,11 @@ class AdministrateurController extends Controller
 //
 //        Mail::to('email@email.com')->send(new BacancyMail($body));
         $beautymail = app()->make(Beautymail::class);
-        $beautymail->send('emails.custom',  ["data"=>$body], function($message) use($body)
+        $beautymail->send('emails.custom',  ["data"=>$body], function($message) use($body, $user)
         {
             $message
                 ->from(config('mail.from.address'), config('mail.from.name'))
-                ->to('email@email.com', 'John Smith')
+                ->to($user->email, $user->prenom)
                 ->subject('Mise a jour réussie!');
         });
 
