@@ -109,14 +109,14 @@ class MembersController extends Controller
         $newuser = User::where('email', $request->input('email'))->first();
 
         // Check if the user is already a member of the project's team
-        if ($newuser && $project->team->users->contains('id', $user->id)) {
+        if ($newuser && $project->team->users->contains('id', $newuser->id)) {
             return $this->errorResponse(404, ["L'utilisateur est déjà membre de l'équipe"],"L'utilisateur est déjà membre de l'équipe" );
         }
         $email= $request->email;
         $projectname = $project->title;
         $teamname = $project->team->name;
         $name = $request->user()->fullname;
-        if ($newuser && !$project->team->users->contains('id', $user->id)) {
+        if ($newuser && !$project->team->users->contains('id', $newuser->id)) {
 
             if( !Teamwork::hasPendingInvite( $request->email, $project->team) ) {
 
@@ -140,7 +140,7 @@ class MembersController extends Controller
                 });
             }
 
-   }elseif (!$newuser && !$project->team->users->contains('id', $user->id)){
+   }elseif (!$newuser){
 
             if( !Teamwork::hasPendingInvite( $request->email, $project->team) ) {
                 Teamwork::inviteToTeam($email, $project->team, function ($invite) use ($teamname, $projectname, $name, $email) {
