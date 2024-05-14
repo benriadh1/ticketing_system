@@ -497,14 +497,24 @@ class ProjectThreadsController extends Controller
             return $this->errorResponse(404, ['Conversation introuvable'], 'Conversation introuvable');
         }
 
-        if ($thread->creator()->id === $request->user()->id) {
-            $thread->removeParticipant(explode(',', $request->user_id));
-            $this->activityService->logActivity('conversation', 'suppression un participant', 'conversation', $thread->id, 'user',  $user->id);
-
-            return $this->successResponse([], 'Enregistrement effectué avec succès!', 200);
-        } else {
+        if ($thread->creator()->id !== $request->user()->id) {
             return $this->errorResponse(422, ['Vous n\'êtes pas le propriétaire'], 'Vous n\'êtes pas le propriétaire');
         }
+        $participantIds = $thread->participants->pluck('user_id')->all();
+        $removeIds = [];
+        foreach (explode(',', $request->user_id) as $memberId) {
+            $memberId = (int) $memberId;
+            if ($memberId && $memberId !== (int) $user->id && in_array($memberId, $participantIds)) {
+                $removeIds[] = $memberId;
+            }
+        }
+        if (!$removeIds) {
+            return $this->errorResponse(422, ["Participant introuvable"], "Participant introuvable");
+        }
+        $thread->removeParticipant(array_values(array_unique($removeIds)));
+        $this->activityService->logActivity('conversation', 'suppression un participant', 'conversation', $thread->id, 'user',  $user->id);
+
+        return $this->successResponse([], 'Enregistrement effectué avec succès!', 200);
     }
 
 
