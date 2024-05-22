@@ -24,12 +24,15 @@ class CrudAdminController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateEmail(Request $request)
+    public function updateEmail(Request $request, $id)
     {
         try {
 
             // Retrieve the authenticated user
             $user = Auth::user();
+            if ($user->id !== intval($id)) {
+                return $this->errorResponse(401, ["Non autorisé"], 'quelque chose s\'est mal passé');
+            }
 
             // Check if the authenticated user has permission to update the profile
 
@@ -81,12 +84,15 @@ class CrudAdminController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updatePassword(Request $request)
+    public function updatePassword(Request $request, $id)
     {
         try {
 
             // Retrieve the authenticated user
             $user = Auth::user();
+            if ($user->id !== intval($id)) {
+                return $this->errorResponse(401, ["Non autorisé"], 'quelque chose s\'est mal passé');
+            }
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'password' => 'required',
