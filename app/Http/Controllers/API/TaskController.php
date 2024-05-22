@@ -104,7 +104,11 @@ class TaskController extends Controller
         // Retrieve the authenticated user
         $user = Auth::user();
 
-        $tasks = Task::where(['assign_id'=> $user->id,'due_date', '>=', $today])->orWhere(['user_id'=> $user->id,'due_date', '>=', $today])
+        $tasks = Task::where(function ($query) use ($user) {
+                $query->where('assign_id', $user->id)
+                    ->orWhere('user_id', $user->id);
+            })
+            ->whereDate('due_date', '>=', $today)
             ->orderBy('due_date')
             ->with('Assigned','creator','project')
             ->get();

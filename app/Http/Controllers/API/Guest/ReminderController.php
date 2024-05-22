@@ -57,9 +57,8 @@ class ReminderController extends Controller
             return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
         }
         // Retrieve reminders related to tasks in the specified project
-        $reminders = Reminder::whereHas('task.project', function ($query) use ($user, $project) {
+        $reminders = Reminder::whereHas('task.project', function ($query) use ($project) {
             $query->where('id', $project->id);
-            $query->where('user_id', $user->id);
         })->orderBy('reminder_datetime', 'desc')->get();
 
 
@@ -91,9 +90,8 @@ class ReminderController extends Controller
             return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
         }
         // Retrieve the last "x" reminders related to tasks in the specified project
-        $reminders = Reminder::whereHas('task.project', function ($query) use ($user, $project) {
+        $reminders = Reminder::whereHas('task.project', function ($query) use ($project) {
                $query->where('id', $project->id);
-            $query->where('user_id', $user->id);
         })->latest()->take($count)->get();
 
         return $this->successResponse($reminders, "Enregistrement effectué avec succès!", 201);
