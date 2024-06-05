@@ -22,11 +22,11 @@ class LastSeenUserActivity
     public function handle($request, Closure $next)
     {
         if ($request->user()) {
-         //   $expireTime = Carbon::now()->addMinute(1); // keep online for 1 min
-         //   Cache::put('is_online'.$request->user()->id, true, $expireTime);
-
-            //Last Seen
-            User::where('id', $request->user()->id)->update(['last_seen' => Carbon::now()]);
+            $key = 'last_seen_'.$request->user()->id;
+            if (!Cache::has($key)) {
+                User::where('id', $request->user()->id)->update(['last_seen' => Carbon::now()]);
+                Cache::put($key, true, Carbon::now()->addMinute());
+            }
         }
         return $next($request);
     }
