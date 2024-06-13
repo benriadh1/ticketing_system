@@ -23,8 +23,9 @@ class ForgotController extends Controller
 
         if (User::where('email', $email)->doesntExist()) {
             return response([
-                'message' => 'L\'utilisateur n\'esiste pas !'
-            ], 404);
+                'message' => '
+Vérifiez votre e-mail !'
+            ]);
         }
 
         $token = Str::random(10);
