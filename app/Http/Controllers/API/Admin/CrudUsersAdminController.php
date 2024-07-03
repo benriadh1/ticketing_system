@@ -57,12 +57,14 @@ class CrudUsersAdminController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateAdminEmail(Request $request)
+    public function updateAdminEmail(Request $request, $id)
     {
         try {
 
-            // Retrieve the authenticated user
-            $user = Auth::user();
+            $user = User::where('role', 'monitor')->find($id);
+            if (!$user) {
+                return $this->errorResponse(404, ['Adminstrateur introuvable'], 'quelque chose s\'est mal passé');
+            }
 
             // Check if the authenticated user has permission to update the profile
 
@@ -114,12 +116,14 @@ class CrudUsersAdminController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateAdminPassword(Request $request)
+    public function updateAdminPassword(Request $request, $id)
     {
         try {
 
-            // Retrieve the authenticated user
-            $user = Auth::user();
+            $user = User::where('role', 'monitor')->find($id);
+            if (!$user) {
+                return $this->errorResponse(404, ['Adminstrateur introuvable'], 'quelque chose s\'est mal passé');
+            }
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'password' => 'required',
