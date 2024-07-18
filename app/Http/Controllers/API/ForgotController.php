@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgotRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class ForgotController extends Controller
 {
@@ -30,7 +32,8 @@ class ForgotController extends Controller
         try {
             DB::table('password_resets')->insert([
                 'email' => $email,
-                'token' => $token
+                'token' => $token,
+                'created_at' => Carbon::now(),
             ]);
 
             //send email
@@ -52,9 +55,26 @@ Vérifiez votre e-mail !'
     }
 
     public function reset(Request $request){
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+            'password' => 'required|string|min:6',
+        ]);
+        if ($validator->fails()) {
+            return response([
+                'message' => 'quelque chose s\'est mal passé'
+            ], 422);
+        }
+
         $token = $request->input('token');
 
         if (!$passwordResets = DB::Table('password_resets')->where('token', $token)->first()) {
+            return response([
+                'message' => '
+Jeton invalide!'
+            ], 400);
+        }
+
+        if (!$passwordResets->created_at || Carbon::parse($passwordResets->created_at)->addHour()->isPast()) {
             return response([
                 'message' => '
 Jeton invalide!'
