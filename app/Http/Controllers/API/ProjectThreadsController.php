@@ -646,7 +646,11 @@ class ProjectThreadsController extends Controller
      */
     public function index(Request $request)
     {
-        $messages = ProjectThreads::where('project_id', '=', 139)->select('thread_id as id')->get();
+        $project = $this->CheckMemberShip($request);
+        if (!$project) {
+            return $this->errorResponse(422, null, "vous n'êtes pas le propriétaire de ce projet");
+        }
+        $messages = ProjectThreads::where('project_id', '=', $project->id)->select('thread_id as id')->get();
         $threads1 = Thread::forUser($request->user()->id)->where('starred','=', true)
             ->with('messages', 'messages.MessageAttachments', 'participants.user:id,fullname,nom,prenom,last_seen', 'messages.user:id,fullname,nom,prenom,last_seen')
          ->get();
@@ -684,7 +688,11 @@ class ProjectThreadsController extends Controller
      */
     public function unreadMessagesCount(Request $request)
     {
-        $messages = ProjectThreads::where('project_id', '=', 139)->select('thread_id as id')->get();
+        $project = $this->CheckMemberShip($request);
+        if (!$project) {
+            return $this->errorResponse(422, null, "vous n'êtes pas le propriétaire de ce projet");
+        }
+        $messages = ProjectThreads::where('project_id', '=', $project->id)->select('thread_id as id')->get();
         $threads = $request->user()->unreadMessagesCount();
         $filter = [];
         foreach ($messages as $m) {
@@ -705,19 +713,23 @@ class ProjectThreadsController extends Controller
      */
     public function UsersArray(Request $request)
     {
-        $messages = Thread::where('id', '=', 23)->with('participants.user:id,fullname,nom,prenom,last_seen')->first();
-     $participants =   $messages->participants;
-        $selected = [];
-        $NewArray = [];
-        foreach ($participants as $participant ) {
-
-
-            //  $members->forget($key);
-            array_push($NewArray, ['id'=>$participant->user->id,'fullname'=>$participant->user->fullname,'nom'=>$participant->user->nom,'prenom'=>$participant->user->prenom]);
-
-
+        $project = $this->CheckMemberShip($request);
+        if (!$project) {
+            return $this->errorResponse(422, null, "vous n'êtes pas le propriétaire de ce projet");
         }
-        $project = Project::where('id','=',139)->with('ProjectTeam','ProjectTeam.users:id,fullname,email,nom,prenom','ProjectTeam.TeamOwner:id,fullname,email,nom,prenom')->first();
+        $project->loadMissing('ProjectTeam.users', 'ProjectTeam.TeamOwner');
+        $NewArray = [];
+        if ($request->id_thread) {
+            $messages = Thread::where('id', '=', $request->id_thread)->with('participants.user:id,fullname,nom,prenom,last_seen')->first();
+            if ($messages) {
+                foreach ($messages->participants as $participant) {
+                    if (!$participant->user) {
+                        continue;
+                    }
+                    array_push($NewArray, ['id'=>$participant->user->id,'fullname'=>$participant->user->fullname,'nom'=>$participant->user->nom,'prenom'=>$participant->user->prenom]);
+                }
+            }
+        }
 
         $members = $project->ProjectTeam->users->makeHidden('pivot');
 
