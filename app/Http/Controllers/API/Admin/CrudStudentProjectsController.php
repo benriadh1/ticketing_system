@@ -139,8 +139,7 @@ class  CrudStudentProjectsController extends Controller
         $team->owner_id =$etudiant->id;
         $team->name =   $request->team_name ?? $project->title;
         $team->save();
-//        // Add team members if provided
-//        $user->attachTeam($team);
+        $etudiant->attachTeam($team);
 
 //        if (!empty($validator['team_members'])) {
 //            $team->attachUsers($user->id);

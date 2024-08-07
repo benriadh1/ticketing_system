@@ -254,8 +254,7 @@ class ProjetController extends Controller
         $team->owner_id =$user->id;
         $team->name =   $request->team_name ?? $project->title;
         $team->save();
-//        // Add team members if provided
-//        $user->attachTeam($team);
+        $user->attachTeam($team);
 
 //        if (!empty($validator['team_members'])) {
 //            $team->attachUsers($user->id);
