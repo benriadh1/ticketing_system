@@ -787,11 +787,17 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
         $task = Task::findOrFail($request->task_id);
+        if (!$this->userCanChangeTask($task, $request->user())) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à modifier le statut de cette tâche."],"Vous n'êtes pas autorisé à modifier le statut de cette tâche." );
+        }
+        if (!$this->assigneeIsOnProject($task, $request->assign_id)) {
+            return $this->errorResponse(422, ["Cet utilisateur n'est pas membre du projet"], "Cet utilisateur n'est pas membre du projet");
+        }
         $Subtask = Task::create([
             'parent_id' => $task->id,
             'title' => $request->title,
             'due_date' => date('Y-m-d', strtotime($request->due_date))  ,
-            'project_id' => $request->id_projet,
+            'project_id' => $task->project_id,
             'user_id' =>  $request->user()->id,
             'description' =>  $request->description,
             'assign_id' =>  $request->assign_id,
@@ -919,12 +925,16 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
         $task = Task::findOrFail($request->task_id);
+        if (!$this->userCanChangeTask($task, $request->user())) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à modifier le statut de cette tâche."],"Vous n'êtes pas autorisé à modifier le statut de cette tâche." );
+        }
+        if (!$this->assigneeIsOnProject($task, $request->assign_id)) {
+            return $this->errorResponse(422, ["Cet utilisateur n'est pas membre du projet"], "Cet utilisateur n'est pas membre du projet");
+        }
         $task->update([
             // 'parent_id' => '',
             'title' => $request->title,
             'due_date' => date('Y-m-d', strtotime($request->due_date))  ,
-            'project_id' => $request->id_projet,
-            'user_id' =>  $request->user()->id,
             'description' =>  $request->description,
             'assign_id' =>  $request->assign_id,
             'priority' =>  $request->priority,
@@ -981,10 +991,11 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
         $task = Task::findOrFail($request->task_id);
+        if (!$this->userCanChangeTask($task, $request->user())) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à modifier le statut de cette tâche."],"Vous n'êtes pas autorisé à modifier le statut de cette tâche." );
+        }
         $task->update([
             // 'parent_id' => '',
-            'user_id' =>  $request->user()->id,
-
             'status' =>  (int)$request->task_status,
 
         ]);
@@ -1040,6 +1051,9 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
         $task = TaskComment::findOrFail($request->commentaire_id);
+        if ((int) $task->user_id !== (int) $request->user()->id) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à modifier ce commentaire."],"Vous n'êtes pas autorisé à modifier ce commentaire." );
+        }
         $task->update([
             // 'parent_id' => '',
             'body' => $request->commentaire,
@@ -1097,12 +1111,19 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
 
+        $parentTask = Task::findOrFail($request->task_id);
+        $user = $request->user();
+        $isMember = $parentTask->project && $parentTask->project->team && $parentTask->project->team->users->contains('id', $user->id);
+        $isOwner = $parentTask->project && $parentTask->project->team && $user->ownedTeams->contains('id', $parentTask->project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+        }
        TaskComment::create([
             // 'parent_id' => '',
 
             'user_id' =>  $request->user()->id,
             'body' =>  $request->commentaire,
-            'task_id' =>  $request->task_id,
+            'task_id' =>  $parentTask->id,
 
 
         ]);
@@ -1148,10 +1169,15 @@ class TaskController extends Controller
             return $this->errorResponse(422, $validator->errors(),'quelque chose s\'est mal passé' );
         }
         $task = Task::findOrFail($request->task_id);
+        $user = $request->user();
+        $isMember = $task->project && $task->project->team && $task->project->team->users->contains('id', $user->id);
+        $isOwner = $task->project && $task->project->team && $user->ownedTeams->contains('id', $task->project->team->id);
+        if (!$isMember && !$isOwner) {
+            return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+        }
         $task->update([
             // 'parent_id' => '',
-            'user_id' =>  $request->user()->id,
-            'assign_id' =>  $request->assign_id,
+            'assign_id' =>  $user->id,
 
 
         ]);
@@ -1169,6 +1195,9 @@ class TaskController extends Controller
     public function destroy($id)
     {
         $task = Task::findOrFail($id);
+        if (!$this->userCanChangeTask($task, auth()->user())) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à supprimer cette tâche."],"Vous n'êtes pas autorisé à supprimer cette tâche." );
+        }
 
         $task->delete();
 
@@ -1183,9 +1212,38 @@ class TaskController extends Controller
     public function destroycommentaire($id)
     {
         $task = TaskComment::findOrFail($id);
+        $userId = auth()->id();
+        $isOwner = (int) $task->user_id === (int) $userId;
+        $isProjectOwner = $task->task && $task->task->project && (int) $task->task->project->user_id === (int) $userId;
+        $isTaskOwner = $task->task && (int) $task->task->user_id === (int) $userId;
+        if (!$isOwner && !$isProjectOwner && !$isTaskOwner) {
+            return $this->errorResponse(403, ["Vous n'êtes pas autorisé à supprimer cette tâche."],"Vous n'êtes pas autorisé à supprimer cette tâche." );
+        }
 
         $task->delete();
 
         return $this->successResponse(null,"Enregistrement effectué avec succès!",201);
+    }
+
+    private function userCanChangeTask($task, $user)
+    {
+        if (!$task || !$task->project || !$task->project->team) {
+            return false;
+        }
+        $isCreator = (int) $task->user_id === (int) $user->id;
+        $isAssignee = (int) $task->assign_id === (int) $user->id;
+        $isProjectOwner = (int) $task->project->user_id === (int) $user->id;
+        $isTeamOwner = $user->ownedTeams->contains('id', $task->project->team->id);
+        return $isCreator || $isAssignee || $isProjectOwner || $isTeamOwner;
+    }
+
+    private function assigneeIsOnProject($task, $assignId)
+    {
+        if (!$task || !$task->project || !$task->project->team) {
+            return false;
+        }
+        $isMember = $task->project->team->users->contains('id', $assignId);
+        $isOwner = $task->project->team->owner_id == $assignId;
+        return $isMember || $isOwner;
     }
 }
