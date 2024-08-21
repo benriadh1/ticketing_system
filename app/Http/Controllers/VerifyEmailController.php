@@ -38,9 +38,11 @@ class VerifyEmailController extends Controller
 
             $user = User::where('email', '=', $userID)->first();
 
-           // $date = date("Y-m-d H:i:s");
+            if (!$user) {
+                return response()->json("Ce lien n'est pas valide.!");
+            }
 
-            $user->email_verified_at = Carbon::now()->timestamp; // to enable the “email_verified_at field of that user be a current time stamp by mimicing the must verify email feature
+            $user->email_verified_at = Carbon::now();
 
             $user->save();
 
