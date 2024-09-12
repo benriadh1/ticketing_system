@@ -294,15 +294,15 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function getThread(Request $request, $threadId)
+    public function getThread(Request $request, $id)
     {
         $user = $request->user();
 
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                         $query->where('user_id', $user->id);
@@ -323,14 +323,14 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function starThread(Request $request,$threadId)
+    public function starThread(Request $request,$id)
     {
         $user = $request->user();
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -352,14 +352,14 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function unstarThread(Request $request,$threadId)
+    public function unstarThread(Request $request,$id)
     {
         $user = $request->user();
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -381,10 +381,10 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function addThreadParticipant(Request $request,$threadId)
+    public function addThreadParticipant(Request $request,$id)
     {
         $data = $request->all();
         $rules = [
@@ -404,7 +404,7 @@ class ProjectThreadsController extends Controller
 
         $user = $request->user();
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -430,10 +430,10 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function removeThreadParticipant(Request $request, $threadId)
+    public function removeThreadParticipant(Request $request, $id)
     {
         $data = $request->all();
         $rules = [
@@ -453,7 +453,7 @@ class ProjectThreadsController extends Controller
 
         $user = $request->user();
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -480,15 +480,15 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function quitThread(Request $request, $threadId)
+    public function quitThread(Request $request, $id)
     {
         $user = $request->user();
 
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -517,15 +517,15 @@ class ProjectThreadsController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @param $threadId
+     * @param $id
      * @return JsonResponse
      */
-    public function markAsRead(Request $request, $threadId)
+    public function markAsRead(Request $request, $id)
     {
 
         $user = $request->user();
         // Retrieve the thread where the user is a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->whereHas('participants', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
@@ -549,7 +549,7 @@ class ProjectThreadsController extends Controller
 
 
 
-    public function updateSubject(Request $request, $threadId)
+    public function updateSubject(Request $request, $id)
     {
         $data = $request->all();
         $rules = [
@@ -569,7 +569,7 @@ class ProjectThreadsController extends Controller
 
         $user = $request->user();
         // Retrieve the thread where the user is the owner or a participant
-        $thread = Thread::where('id', $threadId)
+        $thread = Thread::where('id', $id)
             ->where(function ($query) use ($user) {
                 $query->WhereHas('participants', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
