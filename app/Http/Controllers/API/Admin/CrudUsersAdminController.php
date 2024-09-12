@@ -279,8 +279,18 @@ class CrudUsersAdminController extends Controller
 
         try {
 
+            $admins = [];
             foreach ($explode_id as $userId) {
-                $user = User::findOrFail($userId);
+                if ((int) $userId === (int) auth()->id()) {
+                    return $this->errorResponse(422, ['Vous ne pouvez pas supprimer votre compte'], 'Vous ne pouvez pas supprimer votre compte');
+                }
+                $user = User::where('role', 'monitor')->find($userId);
+                if (!$user) {
+                    return $this->errorResponse(404, ['Un ou plusieurs admintrateurs introuvables.'], 'quelque chose s\'est mal passé');
+                }
+                $admins[] = $user;
+            }
+            foreach ($admins as $user) {
                 DB::table('oauth_access_tokens')
                     ->where('user_id', $user->id)
                     ->update([
@@ -302,11 +312,14 @@ class CrudUsersAdminController extends Controller
     {
         try {
 
-            $user = User::find($id);
+            $user = User::where('role', 'monitor')->find($id);
 
             if (!$user) {
 
                 return $this->errorResponse(404, ['Adminstrateur introuvable'], 'quelque chose s\'est mal passé');
+            }
+            if ((int) $user->id === (int) auth()->id()) {
+                return $this->errorResponse(422, ['Vous ne pouvez pas supprimer votre compte'], 'Vous ne pouvez pas supprimer votre compte');
             }
             DB::table('oauth_access_tokens')
                 ->where('user_id', $user->id)
