@@ -46,7 +46,7 @@ Vérifiez votre e-mail !'
             ]);
         } catch (\Exception $e) {
             return response([
-                'message' =>  $e->getMessage()
+                'message' => 'quelque chose s\'est mal passé'
             ], 400);
         }
     }
@@ -70,6 +70,8 @@ Jeton invalide!'
         $user->password = Hash::make($request->input('password'));
 
         $user->save();
+
+        DB::table('password_resets')->where('token', $token)->delete();
 
         return response([
             'message' => 'Succès'
