@@ -127,7 +127,7 @@ class CrudUsersAdminController extends Controller
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'password' => 'required',
-                'newpassword' => 'required',
+                'newpassword' => 'required|min:6',
             ]);
 
             // Check if validation fails
@@ -143,7 +143,7 @@ class CrudUsersAdminController extends Controller
             $body = [
                 'name'=>$user->prenom,
                 'email' => $user->email,
-                'password' => $user->newpassword,
+                'password' => $request->input('newpassword'),
             ];
             $beautymail = app()->make(Beautymail::class);
             $beautymail->send('emails.userpasswordupdated',  ["data"=>$body], function($message) use( $body)

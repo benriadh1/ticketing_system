@@ -231,7 +231,7 @@ class GestionDemandeInscriptionController extends Controller
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'password' => 'required',
-                'newpassword' => 'required',
+                'newpassword' => 'required|min:6',
             ]);
 
             // Check if validation fails
