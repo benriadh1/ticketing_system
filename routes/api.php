@@ -47,11 +47,11 @@ use Illuminate\Support\Facades\Route;
 //
 
 Route::group(['middleware' => 'guest:api'], function () {
-    Route::post('forgot', [ForgotController::class, 'forgot']);
-    Route::post('reset', [ForgotController::class, 'reset']);
+    Route::post('forgot', [ForgotController::class, 'forgot'])->middleware('throttle:5,1');
+    Route::post('reset', [ForgotController::class, 'reset'])->middleware('throttle:5,1');
     Route::get('/email/verify/{user}', [VerifyEmailController::class, 'verify'])->name('verificationapi.verify')->middleware(['signed']);
     Route::get('/email/resend', [VerifyEmailController::class, 'resend']);
-    Route::post('/login',  [AuthController::class, 'login']);
+    Route::post('/login',  [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get("/details_application", [AppInfoConfigurationController::class, "AppConfiguration"]);
     Route::post('/inscription', [DemandeInscriptionController::class, 'store']);
     Route::post('/invitation/accept', [CrudInvitationController::class, 'acceptInvitation']);
