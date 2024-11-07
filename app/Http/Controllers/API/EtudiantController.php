@@ -1064,10 +1064,10 @@ if($response['result'] === 'success'){
                     $stack = array();
                     if ($files = $request->file) {
                         foreach ($files as $file) {
-                            if ($file->getClientOriginalExtension() === 'jpg' or $file->getClientOriginalExtension() === 'png' or
-                                $file->getClientOriginalExtension() === 'pdf' or $file->getClientOriginalExtension() === 'zip' or
-                                $file->getClientOriginalExtension() === 'docx' or $file->getClientOriginalExtension() === 'doc' or
-                                $file->getClientOriginalExtension() === 'pptx' or $file->getClientOriginalExtension() === 'ppt') {
+                            $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                            $extension = strtolower($file->getClientOriginalExtension());
+                            $realExtension = strtolower($file->extension());
+                            if (in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                                 $path = '/uploads/' .Storage::disk('uploads')->put('/tickets/files/' . $response['id'], $file);
                                 $filename = $request->user()->id . '-' .$file->getClientOriginalName();
                                 array_push($stack, 'http://' . request()->getHost() . '/uploads/' . $path);
@@ -1253,10 +1253,10 @@ if($response['result'] === 'success'){
                                 $stack = array();
                                 if ($files = $request->file) {
                                     foreach ($files as $file) {
-                                        if ($file->getClientOriginalExtension() === 'jpg' or $file->getClientOriginalExtension() === 'png' or
-                                            $file->getClientOriginalExtension() === 'pdf' or $file->getClientOriginalExtension() === 'zip' or
-                                            $file->getClientOriginalExtension() === 'docx' or $file->getClientOriginalExtension() === 'doc' or
-                                            $file->getClientOriginalExtension() === 'pptx' or $file->getClientOriginalExtension() === 'ppt') {
+                                        $allowed = ['jpg', 'png', 'jpeg', 'pdf', 'zip', 'docx', 'doc', 'pptx', 'ppt'];
+                                        $extension = strtolower($file->getClientOriginalExtension());
+                                        $realExtension = strtolower($file->extension());
+                                        if (in_array($extension, $allowed) && in_array($realExtension, $allowed)) {
                                             $path = '/uploads/' . Storage::disk('uploads')->put('/tickets/files/' . $request->ticketid . '/replies', $file);
                                             $filename = $request->user()->id . '-' .$file->getClientOriginalName() ;
                                             array_push($stack, 'http://' . request()->getHost() . '/uploads/' . $path);
@@ -4644,7 +4644,7 @@ if($response['result'] === 'success'){
         $request_data = $request->All();
         $rules = [
             'current-password' => 'required',
-            'password' => 'required|same:password',
+            'password' => 'required|min:6|same:password',
             'password_confirmation' => 'required|same:password',
 
         ];
