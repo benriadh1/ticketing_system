@@ -28,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Send email
         Mail::send('emails.welcome', ['user' => $user, 'token' => $token], function ($m) use ($user) {
-            $m->from('email@email.com.com', 'Your App Name');
+            $m->from(config('mail.from.address'), config('mail.from.name'));
 
             $m->to($user->email, $user->nom)->subject('Welcome to APP');
         });

@@ -416,7 +416,7 @@ class ProjetController extends Controller
                     $beautymail->send('emails.invitationoldmember',  ["data"=>$body], function($message) use( $body)
                     {
                         $message
-                            ->from('email@email.com','Company')
+                            ->from(config('mail.from.address'), config('mail.from.name'))
                             ->to($body['email'] , $body['email'])
                             ->subject("Invitation pour participer à un projet");
                     });
@@ -451,7 +451,7 @@ class ProjetController extends Controller
                     $beautymail->send('emails.invitation',  ["data"=>$body], function($message) use( $body)
                     {
                         $message
-                            ->from('email@email.com','Company')
+                            ->from(config('mail.from.address'), config('mail.from.name'))
                             ->to($body['email'] , $body['email'])
                             ->subject("Invitation pour participer à un projet");
                     });

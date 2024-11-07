@@ -219,7 +219,7 @@ class CrudDemandeController extends Controller
         $beautymail->send('emails.processed',  ["data"=>$body], function($message) use($body)
         {
             $message
-                ->from('email@email.com','Company')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to( $body['email'], $body['name'])
                 ->subject('Inscription réussie!');
         });
@@ -411,7 +411,7 @@ class CrudDemandeController extends Controller
                 $beautymail = app()->make(Beautymail::class);
                 $beautymail->send('emails.welcome',  ["data" => $body], function ($message) use ($body) {
                     $message
-                        ->from('email@email.com', 'Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to($body['email'], $body['name'])
                         ->subject('Candidature acceptée!');
                 });
@@ -449,7 +449,7 @@ class CrudDemandeController extends Controller
         $beautymail->send('emails.rejected',  ["data"=>$body], function($message) use($body)
         {
             $message
-                ->from('email@email.com','Company')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to( $body['email'], $body['name'])
                 ->subject('Candidature refusée!');
         });

@@ -227,7 +227,7 @@ class DemandeInscriptionController extends Controller
                 $beautymail->send('emails.welcome',  ["data"=>$body], function($message) use($body)
                 {
                     $message
-                        ->from('email@email.com','Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to( $body['email'], $body['name'])
                         ->subject('Candidature acceptée!');
                 });
@@ -286,7 +286,7 @@ class DemandeInscriptionController extends Controller
                 $beautymail->send('emails.rejected',  ["data"=>$body], function($message) use($body)
                 {
                     $message
-                        ->from('email@email.com','Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to( $body['email'], $body['name'])
                         ->subject('Candidature refusée!');
                 });
@@ -449,7 +449,7 @@ class DemandeInscriptionController extends Controller
         $beautymail->send('emails.processed',  ["data"=>$body], function($message) use($body)
         {
             $message
-                ->from('email@email.com','Company')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to( $body['email'], $body['name'])
                 ->subject('Inscription réussie!');
         });
@@ -1151,7 +1151,7 @@ class DemandeInscriptionController extends Controller
             $beautymail->send('emails.custom',  ["data"=>$body], function($message) use($subject, $nom, $email, $body)
             {
                 $message
-                    ->from('email@email.com','Company')
+                    ->from(config('mail.from.address'), config('mail.from.name'))
                     ->to('email@email.com','Company')
                     ->subject($subject);
             });
@@ -1166,7 +1166,7 @@ class DemandeInscriptionController extends Controller
             $beautymail->send('emails.welcome',  ["data"=>$body], function($message) use($subject, $nom, $email, $body)
             {
                 $message
-                    ->from('email@email.com','Company')
+                    ->from(config('mail.from.address'), config('mail.from.name'))
                     ->to('email@email.com','Company')
                     ->subject($subject);
             });
@@ -1182,7 +1182,7 @@ class DemandeInscriptionController extends Controller
                 $beautymail->send('emails.verified',  ["data"=>$body], function($message) use($subject, $nom, $email, $body)
                 {
                     $message
-                        ->from('email@email.com','Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to('email@email.com','Company')
                         ->subject($subject);
                 });
@@ -1197,7 +1197,7 @@ class DemandeInscriptionController extends Controller
                 $beautymail->send('emails.accepted',  ["data"=>$body], function($message) use($subject, $nom, $email, $body)
                 {
                     $message
-                        ->from('email@email.com','Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to('email@email.com','Company')
                         ->subject($subject);
                 });
@@ -1212,7 +1212,7 @@ class DemandeInscriptionController extends Controller
                 $beautymail->send('emails.rejected',  ["data"=>$body], function($message) use($subject, $nom, $email, $body)
                 {
                     $message
-                        ->from('email@email.com','Company')
+                        ->from(config('mail.from.address'), config('mail.from.name'))
                         ->to('email@email.com','Company')
                         ->subject($subject);
                 });

@@ -97,7 +97,7 @@ class AdministrateurController extends Controller
         $beautymail->send('emails.custom',  ["data"=>$body], function($message) use($body)
         {
             $message
-                ->from('email@email.com','Company')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to( $body['email'], $body['name'])
                 ->subject('Compte administrateur créé!');
         });
@@ -181,7 +181,7 @@ class AdministrateurController extends Controller
         $beautymail->send('emails.custom',  ["data"=>$body], function($message) use($body)
         {
             $message
-                ->from('email@email.com','Company')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to('email@email.com', 'John Smith')
                 ->subject('Mise a jour réussie!');
         });
