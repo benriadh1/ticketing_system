@@ -50,7 +50,7 @@ Route::group(['middleware' => 'guest:api'], function () {
     Route::post('forgot', [ForgotController::class, 'forgot'])->middleware('throttle:5,1');
     Route::post('reset', [ForgotController::class, 'reset'])->middleware('throttle:5,1');
     Route::get('/email/verify/{user}', [VerifyEmailController::class, 'verify'])->name('verificationapi.verify')->middleware(['signed']);
-    Route::get('/email/resend', [VerifyEmailController::class, 'resend']);
+    Route::get('/email/resend', [VerifyEmailController::class, 'resend'])->middleware('throttle:5,1');
     Route::post('/login',  [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get("/details_application", [AppInfoConfigurationController::class, "AppConfiguration"]);
     Route::post('/inscription', [DemandeInscriptionController::class, 'store']);
