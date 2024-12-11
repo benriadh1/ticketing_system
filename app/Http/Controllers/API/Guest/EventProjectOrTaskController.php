@@ -168,7 +168,16 @@ class EventProjectOrTaskController extends Controller
                 return $this->errorResponse(404, ["Event n'existe pas"], 'quelque chose s\'est mal passé');
             }
 
-
+            $user = Auth::user();
+            $project = $event->task ? $event->task->project : $event->project;
+            if (!$project || !$project->team) {
+                return $this->errorResponse(404, ["Projet introuvable"],"Projet introuvable" );
+            }
+            $isMember = $project->team->users->contains('id', $user->id);
+            $isOwner = $user->ownedTeams->contains('id', $project->team->id);
+            if (!$isMember && !$isOwner) {
+                return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+            }
 
             $rules = [
                 'title' => 'required|string',
@@ -225,6 +234,16 @@ class EventProjectOrTaskController extends Controller
                 return $this->errorResponse(404, ['Event introuvable'], 'quelque chose s\'est mal passé');
             }
 
+            $user = Auth::user();
+            $project = $event->task ? $event->task->project : $event->project;
+            if (!$project || !$project->team) {
+                return $this->errorResponse(404, ["Projet introuvable"],"Projet introuvable" );
+            }
+            $isMember = $project->team->users->contains('id', $user->id);
+            $isOwner = $user->ownedTeams->contains('id', $project->team->id);
+            if (!$isMember && !$isOwner) {
+                return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+            }
 
             $event->delete();
             return $this->successResponse([], "Enregistrement effectué avec succès!", 201);

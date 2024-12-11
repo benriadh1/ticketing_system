@@ -315,6 +315,12 @@ class MeetingController extends Controller
                 return $this->errorResponse(404, ['Meeting introuvable'], 'quelque chose s\'est mal passé');
             }
 
+            $user = Auth::user();
+            $isMember = $meeting->project->team->users->contains('id', $user->id);
+            $isOwner = $user->ownedTeams->contains('id', $meeting->project->team->id);
+            if (!$isMember && !$isOwner) {
+                return $this->errorResponse(403, ["vous n'êtes pas le propriétaire de ce projet"],"vous n'êtes pas le propriétaire de ce projet" );
+            }
 
             $meeting->delete();
             return $this->successResponse([], "Enregistrement effectué avec succès!", 201);
